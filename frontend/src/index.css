@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-white text-dark-900 antialiased font-sans;
+  }
+
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b #ffffff;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: #ffffff;
+    border-left: 2px solid #1e293b;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: #1e293b;
+  }
+
+  ::selection {
+    background: #1e293b;
+    color: #ffffff;
+  }
+}
+
+@layer components {
+  /* Neo-brutalism core utilities */
+  .brutal-border {
+    @apply border-2 border-dark-900;
+  }
+
+  .brutal-shadow {
+    box-shadow: 4px 4px 0px #1e293b;
+  }
+
+  .brutal-shadow-sm {
+    box-shadow: 2px 2px 0px #1e293b;
+  }
+
+  .brutal-card {
+    @apply bg-white border-2 border-dark-900 rounded-none;
+    box-shadow: 6px 6px 0px #1e293b;
+  }
+
+  .brutal-card-hover {
+    @apply brutal-card transition-all duration-150 hover:-translate-y-1 hover:translate-x-1;
+  }
+  .brutal-card-hover:hover {
+    box-shadow: 8px 8px 0px #1e293b;
+  }
+
+  .brutal-input {
+    @apply w-full px-3 py-2.5 bg-white border-2 border-dark-900 rounded-none
+    text-dark-900 placeholder-dark-500
+    focus:outline-none focus:ring-0
+    transition-all duration-150;
+    box-shadow: 4px 4px 0px #1e293b;
+  }
+  .brutal-input:focus {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #1e293b;
+  }
+
+  .btn-primary {
+    @apply px-5 py-2.5 bg-dark-900 text-white font-bold rounded-none
+    border-2 border-dark-900 transition-all duration-150 active:translate-y-1 active:translate-x-1;
+    box-shadow: 4px 4px 0px #1e293b;
+  }
+  
+  .btn-primary:active {
+    box-shadow: 0px 0px 0px #1e293b;
+  }
+
+  .btn-secondary {
+    @apply px-5 py-2.5 bg-white text-dark-900 font-bold rounded-none
+    border-2 border-dark-900 transition-all duration-150 active:translate-y-1 active:translate-x-1;
+    box-shadow: 4px 4px 0px #1e293b;
+  }
+
+  .btn-secondary:active {
+    box-shadow: 0px 0px 0px #1e293b;
+  }
+
+  .btn-danger {
+    @apply px-5 py-2.5 bg-[#ff6b6b] text-dark-900 font-bold rounded-none
+    border-2 border-dark-900 transition-all duration-150 active:translate-y-1 active:translate-x-1;
+    box-shadow: 4px 4px 0px #1e293b;
+  }
+
+  .btn-danger:active {
+    box-shadow: 0px 0px 0px #1e293b;
+  }
+
+  .input-field {
+    @apply brutal-input;
+  }
+
+  .select-field {
+    @apply brutal-input appearance-none cursor-pointer;
+  }
+
+  .label-text {
+    @apply block text-sm font-bold text-dark-900 mb-1.5 uppercase tracking-wider;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2 py-0.5 text-xs font-bold border-2 border-dark-900 bg-white text-dark-900 uppercase;
+    box-shadow: 2px 2px 0px #1e293b;
+  }
+
+  .skeleton {
+    @apply animate-pulse bg-dark-200 border-2 border-dark-900 rounded-none;
+  }
+}
