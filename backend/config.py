@@ -14,9 +14,9 @@ class Config:
     CLIENT_URL = os.getenv("CLIENT_URL", "http://localhost:5173").rstrip("/")
     PORT = int(os.getenv("PORT", 5000))
 
-    # Handle postgres:// vs postgresql:// and enforce pg8000 driver for Railway compatibility
+    # Handle postgres:// vs postgresql:// and enforce modern psycopg3 driver
     if SQLALCHEMY_DATABASE_URI:
         if SQLALCHEMY_DATABASE_URI.startswith("postgres://"):
-            SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql+pg8000://", 1)
+            SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgres://", "postgresql+psycopg://", 1)
         elif SQLALCHEMY_DATABASE_URI.startswith("postgresql://"):
-            SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+pg8000://", 1)
+            SQLALCHEMY_DATABASE_URI = SQLALCHEMY_DATABASE_URI.replace("postgresql://", "postgresql+psycopg://", 1)
