@@ -1,10 +1,17 @@
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Calendar, FolderKanban, CheckSquare, Zap } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { User, Mail, Calendar, FolderKanban, CheckSquare, Zap, LogOut } from 'lucide-react';
 
 export default function Profile() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   if (!user) return null;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const stats = user._count || {};
 
@@ -22,10 +29,16 @@ export default function Profile() {
         </div>
         <h2 className="text-[10px] font-black text-dark-900 uppercase tracking-tight">{user.name}</h2>
         <p className="text-dark-900 mt-2 font-bold text-[10px]">{user.email}</p>
-        <div className="mt-6">
-          <span className="inline-flex items-center gap-2 px-1 py-2 border-2 border-dark-900 bg-white text-dark-900 text-[8px] font-black uppercase brutal-shadow-sm">
-            <User className="w-3 h-3" /> Workspace User
+        <div className="mt-6 flex flex-col sm:flex-row justify-center gap-2">
+          <span className="inline-flex items-center gap-2 px-3 py-2 border-2 border-dark-900 bg-white text-dark-900 text-xs font-black uppercase brutal-shadow-sm">
+            <User className="w-4 h-4" /> Workspace User
           </span>
+          <button 
+            onClick={handleLogout}
+            className="inline-flex items-center gap-2 px-3 py-2 border-2 border-dark-900 bg-dark-900 text-white text-xs font-black uppercase brutal-shadow-sm hover:bg-danger transition-colors"
+          >
+            <LogOut className="w-4 h-4" /> Sign Out
+          </button>
         </div>
       </div>
 
