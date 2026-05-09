@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { taskService } from '../services';
+import { taskService, projectService } from '../services';
 import { useAuth } from '../context/AuthContext';
 import { Search, CheckSquare, Clock, AlertTriangle, Trash2, X, Edit3 } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -13,9 +13,13 @@ export default function Tasks() {
   const [filters, setFilters] = useState({ status: '', priority: '', search: '', overdue: '' });
   const [editTask, setEditTask] = useState(null);
   const [editForm, setEditForm] = useState({});
+  const [projects, setProjects] = useState([]);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addForm, setAddForm] = useState({ title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '', projectId: '' });
+  const [saving, setSaving] = useState(false);
   // Removed isAdmin to let anyone do actions per instructions
 
-  useEffect(() => { loadTasks(); }, [filters]);
+  useEffect(() => { loadTasks(); loadProjects(); }, [filters]);
 
   const loadTasks = async () => {
     setLoading(true);
@@ -29,6 +33,28 @@ export default function Tasks() {
       setTasks(res.data.data);
     } catch { toast.error('Failed to load tasks'); }
     finally { setLoading(false); }
+  };
+
+  const loadProjects = async () => {
+    try {
+      const res = await projectService.getAll();
+      setProjects(res.data.data);
+    } catch {}
+  };
+
+  const handleCreateTask = async (e) => {
+    e.preventDefault();
+    if (!addForm.title.trim()) return toast.error('Title is required');
+    if (!addForm.projectId) return toast.error('Please select a project');
+    setSaving(true);
+    try {
+      await taskService.create(addForm);
+      toast.success('Task created');
+      setShowAddModal(false);
+      setAddForm({ title: '', description: '', status: 'TODO', priority: 'MEDIUM', dueDate: '', projectId: '' });
+      loadTasks();
+    } catch (err) { toast.error(err.response?.data?.message || 'Failed'); }
+    finally { setSaving(false); }
   };
 
   const handleUpdateStatus = async (taskId, status) => {
@@ -69,9 +95,15 @@ export default function Tasks() {
 
   return (
     <div className="space-y-8">
-      <div className="border-b-4 border-dark-900 pb-4">
-        <h1 className="text-[10px] font-black text-dark-900 uppercase tracking-tight">ALL TASKS</h1>
-        <p className="text-dark-900 mt-2 font-bold uppercase tracking-wide">Manage and track workspace tasks</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-1 border-b-4 border-dark-900 pb-4">
+        <div>
+          <h1 className="text-[10px] font-black text-dark-900 uppercase tracking-tight">ALL TASKS</h1>
+          <p className="text-dark-900 mt-2 font-bold uppercase tracking-wide">{tasks.length} task{tasks.length !== 1 ? 's' : ''} in workspace</p>
+        </div>
+        <button onClick={() => setShowAddModal(true)} className="btn-primary flex items-center justify-center gap-2 text-[8px] whitespace-nowrap">
+          <Search className="hidden" /> {/* Spacer trick */}
+          ADD NEW TASK
+        </button>
       </div>
 
       {/* Filters */}
@@ -178,6 +210,42 @@ export default function Tasks() {
               <div className="flex justify-end gap-1 pt-6 border-t-2 border-dark-900">
                 <button type="button" onClick={() => setEditTask(null)} className="btn-secondary">CANCEL</button>
                 <button type="submit" className="btn-primary bg-success text-dark-900">SAVE CHANGES</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Add Task Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-dark-900/80 z-50 flex items-center justify-center p-1 backdrop-blur-sm" onClick={() => setShowAddModal(false)}>
+          <div className="brutal-card w-full max-w-xl p-2 bg-white animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2 border-b-4 border-dark-900 pb-4">
+              <h2 className="text-[10px] font-black text-dark-900 uppercase tracking-tight">NEW TASK</h2>
+              <button onClick={() => setShowAddModal(false)} className="p-2 border-2 border-dark-900 hover:bg-danger transition-colors hover:text-white"><X className="w-3 h-3" /></button>
+            </div>
+            <form onSubmit={handleCreateTask} className="space-y-6">
+              <div><label className="label-text">Project</label>
+                <select value={addForm.projectId} onChange={(e) => setAddForm({ ...addForm, projectId: e.target.value })} className="select-field font-bold uppercase">
+                  <option value="">SELECT PROJECT...</option>
+                  {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+                </select>
+              </div>
+              <div><label className="label-text">Title</label><input value={addForm.title} onChange={(e) => setAddForm({ ...addForm, title: e.target.value })} className="brutal-input uppercase" placeholder="TASK NAME" /></div>
+              <div><label className="label-text">Description</label><textarea value={addForm.description} onChange={(e) => setAddForm({ ...addForm, description: e.target.value })} className="brutal-input min-h-[100px] resize-none uppercase" placeholder="OPTIONAL" /></div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <div><label className="label-text">Status</label>
+                  <select value={addForm.status} onChange={(e) => setAddForm({ ...addForm, status: e.target.value })} className="select-field font-bold uppercase">
+                    <option value="TODO">TO DO</option><option value="IN_PROGRESS">IN PROGRESS</option><option value="COMPLETED">COMPLETED</option>
+                  </select></div>
+                <div><label className="label-text">Priority</label>
+                  <select value={addForm.priority} onChange={(e) => setAddForm({ ...addForm, priority: e.target.value })} className="select-field font-bold uppercase">
+                    <option value="LOW">LOW</option><option value="MEDIUM">MEDIUM</option><option value="HIGH">HIGH</option>
+                  </select></div>
+                <div><label className="label-text">Due Date</label><input type="date" value={addForm.dueDate} onChange={(e) => setAddForm({ ...addForm, dueDate: e.target.value })} className="brutal-input font-bold" /></div>
+              </div>
+              <div className="flex justify-end gap-1 pt-6 border-t-2 border-dark-900">
+                <button type="button" onClick={() => setShowAddModal(false)} className="btn-secondary">CANCEL</button>
+                <button type="submit" disabled={saving} className="btn-primary bg-success text-dark-900">{saving ? 'CREATING...' : 'CREATE TASK'}</button>
               </div>
             </form>
           </div>

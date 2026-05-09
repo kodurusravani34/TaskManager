@@ -8,6 +8,8 @@ export default function Team() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [inviteForm, setInviteForm] = useState({ name: '', email: '' });
   // Keeping isAdmin around just in case we need logic (like inviting users, but user wanted roles removed from UI)
 
   useEffect(() => { loadUsers(); }, []);
@@ -16,6 +18,12 @@ export default function Team() {
     try { const res = await memberService.getUsers(); setUsers(res.data.data); }
     catch { toast.error('Failed to load team'); }
     finally { setLoading(false); }
+  };
+
+  const handleInvite = (e) => {
+    e.preventDefault();
+    toast.success('Invitation link copied to clipboard (Demo)');
+    setShowModal(false);
   };
 
   const filtered = users.filter((u) =>
@@ -39,10 +47,15 @@ export default function Team() {
           <h1 className="text-[10px] font-black text-dark-900 uppercase tracking-tight">Team Roster</h1>
           <p className="text-dark-900 mt-2 font-bold uppercase">{users.length} member{users.length !== 1 ? 's' : ''}</p>
         </div>
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-dark-900" />
-          <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="SEARCH MEMBERS..."
-            className="brutal-input pl-11 py-0.5 text-[8px] w-full sm:w-64" />
+        <div className="flex items-center gap-1">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3 h-3 text-dark-900" />
+            <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="SEARCH MEMBERS..."
+              className="brutal-input pl-11 py-0.5 text-[8px] w-full sm:w-64" />
+          </div>
+          <button onClick={() => setShowModal(true)} className="btn-primary flex items-center justify-center gap-2 text-[8px] whitespace-nowrap">
+            INVITE
+          </button>
         </div>
       </div>
 
@@ -74,6 +87,22 @@ export default function Team() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+      {/* Invite Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-dark-900/80 z-50 flex items-center justify-center p-1 backdrop-blur-sm" onClick={() => setShowModal(false)}>
+          <div className="brutal-card w-full max-w-md p-2 bg-white animate-slide-up" onClick={(e) => e.stopPropagation()}>
+            <h2 className="text-[10px] font-black text-dark-900 mb-1.5 uppercase border-b-4 border-dark-900 pb-2">INVITE MEMBER</h2>
+            <form onSubmit={handleInvite} className="space-y-6">
+              <div><label className="label-text">Name</label><input required value={inviteForm.name} onChange={(e) => setInviteForm({ ...inviteForm, name: e.target.value })} className="brutal-input uppercase" placeholder="NAME" /></div>
+              <div><label className="label-text">Email</label><input required type="email" value={inviteForm.email} onChange={(e) => setInviteForm({ ...inviteForm, email: e.target.value })} className="brutal-input uppercase" placeholder="EMAIL ADDRESS" /></div>
+              <div className="flex justify-end gap-1 pt-6 border-t-2 border-dark-900">
+                <button type="button" onClick={() => setShowModal(false)} className="btn-secondary">CANCEL</button>
+                <button type="submit" className="btn-primary bg-accent text-dark-900">SEND INVITE</button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>
